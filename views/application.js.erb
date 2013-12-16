@@ -1,0 +1,176 @@
+var scheme   = "<%= @scheme %>";
+var uri      = scheme + window.document.location.host + "/";
+var ws       = new WebSocket(uri);
+
+
+var root = {};
+ws.onmessage = function(event){ update_root(event.data)};
+
+// all the pdus availables
+var nodes = [];
+// Gets the nodes from the query parameters
+var nodesToDraw = [];
+try{
+  nodesQueryParams = document.location.search.split('=')[1].split(',');
+  if (nodesQueryParams.length > 0){
+    nodesToDraw = nodesQueryParams;
+  }
+}
+catch (e){
+  var nodesToDraw = [];
+}
+
+
+
+// all the elements to summarize
+var summaryElements = [{"title" : "Total", "value" : 0}];
+
+// transform into select2 data input
+function mapNodes(el){
+  var result = {};
+  result.id = el;
+  result.text = el;
+  return result;
+};
+
+// initialize nodes after a certain period of time
+setTimeout(function(){
+
+  d3.select("#nodes-container .loader").remove();
+  d3.select("#nodes-container")
+    .append("input")
+  .attr("class", "nodes-select");
+
+  console.log("Initializing nodes .. "); 
+  $(".nodes-select").select2({
+    placeholder : "Find hosts",
+    multiple : true,
+    data : nodes.map(mapNodes),
+    initSelection : function (element, callback) {
+      var data = [];
+      $(element.val().split(",")).each(function() {
+        if (this != ""){
+          data.push({id: this, text: this})
+        }
+      });
+      callback(data);
+    }
+  }).select2('val', nodesToDraw);
+
+  $(".nodes-select").on("change", function(e) {
+    console.log("select 2 change : "+JSON.stringify({val:e.val, added:e.added, removed:e.removed}));
+    nodesToDraw =  e.val;
+    console.log(nodesToDraw)
+    if (e.removed){
+      console.log("removing" + e.removed.id);
+      d3.select("#n" + e.removed.id).remove();
+      delete chart[e.removed.id]
+
+    }
+  })
+  },5000
+);
+
+
+var lengthToDraw = 180; 
+
+function update_root(json){
+
+  data = JSON.parse(json)
+
+  var keys = Object.keys(data);
+  for (i in keys){
+    var key = keys[i]
+    var sanitizedKey = "n" + key;
+
+    if (nodes.indexOf(key) < 0){
+      nodes.push(key);
+    }
+
+    if (root[key] === undefined){
+      root[key] = {"sanitizedKey" : sanitizedKey, "key" : key, "values" : [] };
+    }
+    var datas = root[key]["values"];
+    if (datas.length > lengthToDraw){
+      datas.splice(0,1);
+    }
+    datas.push({"x": data[key]["timestamp"], "y" : data[key]["watt"]});
+    if (nodesToDraw.indexOf(key) >= 0){
+      redraw(root[key]);
+    }
+  }
+  updateSummaryInformation();
+  updateSummary();
+}
+
+function updateSummaryInformation(){
+  sumTotal = summaryElements.filter(function(e){return e.title=="Total"})[0];
+  sumTotal.value = 0;
+  for (var i in nodesToDraw){
+    // don't update for unknown hosts
+    var key = nodesToDraw[i];
+    if (root[key] === undefined){
+      return
+    }
+    var values = root[key].values;
+    sumTotal.value += values[values.length -1 ].y
+  }
+}
+
+var chart = {} ;
+
+function redraw(node) {
+  if (chart[node.key] ===  undefined){
+    newGraph(node);
+    return;
+  }
+ 
+  d3.select('#' + node.sanitizedKey + ' svg')
+    .datum([node])
+    .call(chart[node.key]);
+  }
+
+var newGraph = function (node){
+  nv.addGraph(function() {  
+    chart[node.key] = nv.models.lineChart();
+    
+    chart[node.key].xAxis
+      .axisLabel('Time')
+      //.tickFormat(d3.format(',r'));
+      .tickFormat(function(d){return d3.time.format('%X')(new Date(d*1000));})
+
+    chart[node.key].yAxis
+      .axisLabel('(W)')
+      .tickFormat(d3.format('.02f'));
+    
+    d3.select('#container')
+      .append('div')
+      .attr('id', node.sanitizedKey)
+      .append('svg')
+      .datum([node])
+      .call(chart[node.key]);
+
+//     nv.utils.windowResize(function() { d3.select('#' + node + ' svg')).call(chart) });
+    return chart[node.key];
+  });
+}
+
+function updateSummary(){
+
+   function generateHtmlSummary(summary){
+     var html = '<div class="title">'+ summary.title +'</div>'
+       html += '<div class="num">' + summary.value  + '</div>';
+     return html;
+   }
+    var summary = d3.select(".summaryContainer").selectAll(".summary")
+      .data(summaryElements);
+
+    summary.html(function(d){return generateHtmlSummary(d)});
+
+    summary.enter()
+      .append("div")
+      .attr("class", "summary col-md-3")
+      .html(function(d){return generateHtmlSummary(d)})
+    
+  }
+

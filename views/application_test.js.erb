@@ -1,0 +1,71 @@
+var scheme   = "<%= @scheme %>";
+var uri      = scheme + window.document.location.host + "/";
+var ws       = new WebSocket(uri);
+
+
+var root = {};
+ws.onmessage = function(event){ update_root(event.data)};
+
+//var nodeToDraw = ["sagittaire-78", "sagittaire-79"]; 
+var nodeToDraw = ["taurus-1","taurus-2","taurus-3"]; 
+
+function update_root(json){
+  data = JSON.parse(json)
+  // Get the keys
+  var keys = Object.keys(data);
+  for (i in keys){
+    var key = keys[i]
+    if (root[key] === undefined){
+      root[key] = {"key" : key, "values" : [] };
+    }
+    root[key]["values"].push({"x": data[key]["timestamp"], "y" : data[key]["watt"]});
+  }
+  redraw()
+}
+
+var chart ;
+
+function redraw() {
+  if (chart === undefined){
+    addGraph();
+    return;
+  }
+ 
+  var toRedraw = [];
+
+  for ( node in nodeToDraw){
+    var key = nodeToDraw[node]
+    toRedraw.push(root[key]) 
+  }
+
+  d3.select('#container svg')
+    .datum(toRedraw)
+    .transition().duration(500)
+    .call(chart);
+  }
+
+  function addGraph(){
+    nv.addGraph(function() {  
+      chart = nv.models.lineChart();
+
+      var height = 400;
+      
+      chart.xAxis
+        .axisLabel('Time')
+        //.tickFormat(d3.format(',r'));
+        .tickFormat(function(d){return d3.time.format('%X')(new Date(d*1000));})
+
+      chart.yAxis
+        .axisLabel('(W)')
+        .tickFormat(d3.format('.02f'));
+
+      d3.select('#container svg')
+      .datum([])
+        .call(chart);
+
+//     nv.utils.windowResize(function() { d3.select('#container svg').call(chart) });
+    
+     return chart;
+    });
+  }
+
