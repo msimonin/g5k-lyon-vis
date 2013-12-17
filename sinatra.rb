@@ -27,7 +27,7 @@ module PDUs
       erb :"application.js"
     end
 
-    get "/assets/js/application.js" do
+    get "/assets/js/application_test.js" do
       content_type :js
       puts "require js"
       @scheme = ENV['RACK_ENV'] == "production" ? "wss://" : "ws://"
