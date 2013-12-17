@@ -33,4 +33,11 @@ $) bundle install
 $) bundle exec puma
 ```
 
+
+Use it
+------
+
 * From here clients can connect to `http://yourip:9292`
+
+Nodes can be passed in the query string : `http://yourip:9292?nodes=taurus-1,taurus-2,taurus-3`
+
