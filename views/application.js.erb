@@ -132,7 +132,7 @@ function redraw(node) {
 
 var newGraph = function (node){
   nv.addGraph(function() {  
-    chart[node.key] = nv.models.lineWithFocusChart();
+    chart[node.key] = nv.models.lineChart();
     
     chart[node.key].xAxis
       .axisLabel('Time')
