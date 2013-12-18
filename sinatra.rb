@@ -16,6 +16,10 @@ module PDUs
       erb :"index.html"
     end
 
+    get "/stacked" do
+      erb :"stacked.html"
+    end
+
     get "/test" do
       erb :"test.html"
     end
@@ -27,11 +31,18 @@ module PDUs
       erb :"application.js"
     end
 
-    get "/assets/js/application.js" do
+    get "/assets/js/application_test.js" do
       content_type :js
       puts "require js"
       @scheme = ENV['RACK_ENV'] == "production" ? "wss://" : "ws://"
       erb :"application_test.js"
+    end
+
+    get "/assets/js/application_stacked.js" do
+      content_type :js
+      puts "require js"
+      @scheme = ENV['RACK_ENV'] == "production" ? "wss://" : "ws://"
+      erb :"application_stacked.js"
     end
   end
 end

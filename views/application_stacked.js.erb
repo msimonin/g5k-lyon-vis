@@ -9,6 +9,8 @@ ws.onmessage = function(event){ update_root(event.data)};
 // all the pdus availables
 var nodes = [];
 // Gets the nodes from the query parameters
+
+
 var nodesToDraw = [];
 try{
   nodesQueryParams = document.location.search.split('=')[1].split(',');
@@ -19,8 +21,6 @@ try{
 catch (e){
   var nodesToDraw = [];
 }
-
-
 
 // all the elements to summarize
 var summaryElements = [{"title" : "Total", "value" : 0}];
@@ -91,14 +91,9 @@ function update_root(json){
       root[key] = {"sanitizedKey" : sanitizedKey, "key" : key, "values" : [] };
     }
     var datas = root[key]["values"];
-    if (datas.length > lengthToDraw){
-      datas.splice(0,1);
-    }
     datas.push({"x": data[key]["timestamp"], "y" : data[key]["watt"]});
-    if (nodesToDraw.indexOf(key) >= 0){
-      redraw(root[key]);
-    }
   }
+  redraw();
   updateSummaryInformation();
   updateSummary();
 }
@@ -117,41 +112,44 @@ function updateSummaryInformation(){
   }
 }
 
-var chart = {} ;
+var chart ;
 
-function redraw(node) {
-  if (chart[node.key] ===  undefined){
-    newGraph(node);
+function redraw() {
+  console.log("redraw")
+  if (chart ===  undefined){
+    console.log("before new graph")
+    newGraph();
     return;
   }
- 
-  d3.select('#' + node.sanitizedKey + ' svg')
-    .datum([node])
-    .call(chart[node.key]);
+
+  d3.select('#graph svg')
+    .datum(nodesToDraw.map(function(key){return root[key]}))
+    .call(chart);
   }
 
-var newGraph = function (node){
+var newGraph = function (){
+  console.log("new graph")
   nv.addGraph(function() {  
-    chart[node.key] = nv.models.lineWithFocusChart();
+    chart = nv.models.lineWithFocusChart();
     
-    chart[node.key].xAxis
+    chart.xAxis
       .axisLabel('Time')
       //.tickFormat(d3.format(',r'));
       .tickFormat(function(d){return d3.time.format('%X')(new Date(d*1000));})
 
-    chart[node.key].yAxis
+    chart.yAxis
       .axisLabel('(W)')
       .tickFormat(d3.format('.02f'));
     
     d3.select('#container')
       .append('div')
-      .attr('id', node.sanitizedKey)
+      .attr('id', 'graph')
       .append('svg')
-      .datum([node])
-      .call(chart[node.key]);
+      .datum(nodesToDraw.map(function(key){return root[key]}))
+      .call(chart);
 
 //     nv.utils.windowResize(function() { d3.select('#' + node + ' svg')).call(chart) });
-    return chart[node.key];
+    return chart;
   });
 }
 
