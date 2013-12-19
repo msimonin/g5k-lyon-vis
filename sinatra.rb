@@ -13,11 +13,11 @@ module PDUs
     end
 
     get "/" do
-      erb :"index.html"
+      erb :"stacked.html"
     end
 
-    get "/stacked" do
-      erb :"stacked.html"
+    get "/legacy" do
+      erb :"index.html"
     end
 
     get "/test" do
