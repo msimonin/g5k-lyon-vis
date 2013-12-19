@@ -121,11 +121,16 @@ function redraw() {
     newGraph();
     return;
   }
-
+  try{
+    chart.dispatch.on('brush', function(e){console.log(e.extent)});
+  }
+  catch (e){
+    console.log("undefined")
+  }
   d3.select('#graph svg')
     .datum(nodesToDraw.map(function(key){return root[key]}))
-    .call(chart);
-  }
+   .call(chart);
+}
 
 var newGraph = function (){
   console.log("new graph")
@@ -140,6 +145,7 @@ var newGraph = function (){
     chart.yAxis
       .axisLabel('(W)')
       .tickFormat(d3.format('.02f'));
+  
     
     d3.select('#container')
       .append('div')

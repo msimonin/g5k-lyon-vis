@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Ruby WebSockets PDUs</title>
+
+    <title>Grid'5000 visualization : Lyon power consumption.</title>
+    <meta charset="utf-8">
+    <meta name="description" content="Real time power consumption of Lyon site.
+    Visualization using NVD3.js, select2 and bootstrap."/>
+    <meta name="author" content="Matthieu Simonin" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="assets/css/nv.d3.min.css" rel="stylesheet" type="text/css">
     <link href="assets/css/select2.css" rel="stylesheet" type="text/css">
+    <link href="assets/css/bootstrap.css" rel="stylesheet" type="text/css">
     <script type="text/javascript" src="assets/js/d3.min.js"></script>
     <script type="text/javascript" src="assets/js/nv.d3.js"></script>
     <script type="text/javascript" src="assets/js/jquery-2.0.3.min.js"></script>
@@ -40,6 +46,22 @@
   </head>
 
   <body>
+    <div class="container">
+      <h1>Real Time Lyon power consumption</h1>
+      <p>
+        <a href="https://grid5000.fr" title="Grid'5000">Grid'5000</a> is a scientific instrument for the study of large scale parallel and distributed systems. 
+        The infrastructure of Grid'5000 is geographically distributed on different sites hosting the instrument.
+        It aims at providing a highly reconfigurable, controlable and monitorable experimental platform to its users.
+        The initial aim (circa 2003) was to reach 5000 processors in the platform. It has been reframed at 5000 cores, and was reached during winter 2008-2009.
+      </p>
+      <p>
+      The visualization below shows you real time the power consumption in of Lyon site.
+      </p>
+      <p>
+      Choose one or more nodes to display. Making a selection on the second graph will allow you to focus on the selected part.
+      </p>
+    </div>
+
     <div id="container">
       <div class="summaryContainer"></div>
       <div id="nodes-container">
