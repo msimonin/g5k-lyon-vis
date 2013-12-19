@@ -133,8 +133,8 @@ var newGraph = function (){
     chart = nv.models.lineWithFocusChart();
     
     chart.xAxis
-      .axisLabel('Time')
-      //.tickFormat(d3.format(',r'));
+      .tickFormat(function(d){return d3.time.format('%X')(new Date(d*1000));})
+    chart.x2Axis
       .tickFormat(function(d){return d3.time.format('%X')(new Date(d*1000));})
 
     chart.yAxis
