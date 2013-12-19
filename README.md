@@ -42,9 +42,4 @@ Use it
 Nodes can be passed in the query string : `http://yourip:9292?nodes=taurus-1,taurus-2,taurus-3`
 
 
-Paths
------
-
-* `http://yourip:9292` : show one graph per node.
-* `http://yourip:9292/stacked` : show a stacked graph with focus.
 
